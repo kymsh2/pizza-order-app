@@ -1,17 +1,8 @@
 import React, { Component } from "react";
 import { Text, View } from "react-native";
-import getPizzaOrders from "./orderData";
-import styles from "./styles";
-
-// Helper to parse duration string to seconds
-type Order = {
-  customer: string;
-  address: string;
-  pizza: string;
-  size: string;
-  status: string;
-  orderReadyTime: string;
-};
+import { fetchOrders } from "../../src/api/orders.api";
+import { WooOrder } from "../../src/type/orders";
+import styles from "../styles";
 
 function parseDuration(durationStr: string): number {
   const [value, unit] = durationStr.split(" ");
@@ -23,7 +14,7 @@ function parseDuration(durationStr: string): number {
 
 interface PizzaOrderState {
   timers: number[];
-  orders: Order[];
+  orders: WooOrder[];
 }
 
 class PizzaOrder extends Component<{}, PizzaOrderState> {
@@ -31,19 +22,29 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
   constructor(props: {}) {
     super(props);
-    const orders = getPizzaOrders();
     this.state = {
-      timers: orders.map((order: Order) => parseDuration(order.orderReadyTime)),
-      orders,
+      timers: [],
+      orders: [],
     };
   }
 
-  componentDidMount() {
-    this.interval = setInterval(() => {
-      this.setState((prevState) => ({
-        timers: prevState.timers.map((t: number) => (t > 0 ? t - 1 : 0)),
-      }));
-    }, 1000);
+  async componentDidMount() {
+    try {
+      const orders = await fetchOrders();
+      console.log("Fetched orders:", orders);
+      this.setState({
+        orders,
+        timers: orders.map((order: WooOrder) => parseDuration(30 + " min")),
+      });
+      this.interval = setInterval(() => {
+        this.setState((prevState) => ({
+          timers: prevState.timers.map((t: number) => (t > 0 ? t - 1 : 0)),
+        }));
+      }, 1000);
+    } catch (error: any) {
+      // Optionally handle error state here
+      console.error("Failed to fetch orders:", error);
+    }
   }
 
   componentWillUnmount() {
@@ -61,15 +62,24 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Pizza Delivery Orders</Text>
-        {orders.map((order: Order, idx: number) => (
+        {orders.map((order: WooOrder, idx: number) => (
           <View key={idx} style={styles.orderCard}>
             <View style={styles.orderInfo}>
-              <Text style={styles.orderNumber}>Order #{idx + 1}</Text>
-              <Text>Customer: {order.customer}</Text>
-              <Text>Address: {order.address}</Text>
-              <Text>Pizza: {order.pizza}</Text>
-              <Text>Size: {order.size}</Text>
+              <Text style={styles.orderNumber}>Order {order.id}</Text>
               <Text>Status: {order.status}</Text>
+              <Text>Order Date Time: {order.date_created}</Text>
+              <Text>Amount: {order.total}</Text>
+              <Text>Customer: {order.billing.first_name}</Text>
+              <Text>Address: {order.shipping.address_1}</Text>
+              <Text>Pizza: {order.line_items[0]?.name}</Text>
+              <Text>
+                Size:{" "}
+                {
+                  order.line_items[0]?.meta_data.find(
+                    (meta) => meta.key === "size"
+                  )?.value
+                }
+              </Text>
             </View>
             <View style={styles.timerContainer}>
               <Text style={styles.timerText}>

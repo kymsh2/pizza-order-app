@@ -2,7 +2,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
 import { Text, View } from "react-native";
 import { fetchOrders } from "../../src/api/orders.api";
-import { WooOrder } from "../../src/type/orders";
+import { WooOrder } from "../../src/type/wc_orders";
 import styles from "../styles/styles";
 import OrderDetail from "./OrderDetail";
 

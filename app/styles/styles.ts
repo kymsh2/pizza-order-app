@@ -192,6 +192,43 @@ export const styles = StyleSheet.create({
     height: "100%",
     opacity: 0,
   },
+
+  // ORDER DETAIL STYLES
+  orderDetailContainer: { padding: 18, backgroundColor: "#fff" },
+
+
+  totalText: { fontSize: 26, fontWeight: "bold", marginBottom: 8 },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e7ffe7",
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  statusText: { marginLeft: 6, color: "green", fontWeight: "600" },
+
+  metaBox: { borderBottomWidth: 1, borderColor: "#e5e5e5", paddingBottom: 15 },
+  row: { flexDirection: "row", marginBottom: 4 },
+  rowLabel: { width: 120, color: "#444" },
+  rowValue: { color: "#222" },
+
+  customerBox: { paddingVertical: 18 },
+  // customerName: { fontSize: 18, fontWeight: "600" },
+  firstOrder: { color: "#007aff", marginBottom: 10 },
+  rowIcon: { flexDirection: "row", alignItems: "center", marginVertical: 4 },
+  contactText: { marginLeft: 8, fontSize: 15 },
+  note: { color: "#007aff", marginTop: 8, fontSize: 13 },
+
+  sectionTitle: { fontSize: 18, fontWeight: "600", marginTop: 10 },
+  itemRow: { flexDirection: "row", marginVertical: 12 },
+  itemQty: { marginRight: 10, fontSize: 16 },
+  itemName: { fontSize: 16 },
+  sizeText: { fontSize: 13, color: "#555" },
+
+  summaryBox: { marginTop: 20 },
+
+  ///////////////////////////////////////////
 });
 
 export default styles;

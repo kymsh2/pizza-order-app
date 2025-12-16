@@ -4,6 +4,7 @@ export enum OrderStatus {
   ACCEPTED = "ACCEPTED",
   CANCELLED = "CANCELLED",
   COMPLETED = "COMPLETED",
+  PROCESSING = "PROCESSING",
 }
 
 export interface Customer {
@@ -21,28 +22,30 @@ export interface Customer {
 
 export interface OrderItem {
   id: string;
-  product_name: string;
+  name: string;
   quantity: number;
+  price: number;
+  total?: number;
   variation_name?: string | null;
+  size?: string | null;
 }
 
 export interface Order {
   id: string;
   wc_order_id: number;
-
   status: OrderStatus;
-
   created_at: string; // ISO string
   accepted_at?: string | null;
+  completed_at?: string | null;
   pickup_at?: string | null;
-
   prep_minutes?: number | null;
-
   remaining_seconds?: number | null;
-
   customer: Customer;
-
   items: OrderItem[];
+  total: number;
+  payment_method: string;
+  oder_notes?: string | null;
+  total_tax?: number;
 }
 
 export interface GetActiveOrdersResponse {

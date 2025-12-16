@@ -115,30 +115,30 @@ export const styles = StyleSheet.create({
     marginRight: 14,
   },
   customerName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: "#222",
   },
    orderStatus: {
-    fontSize: 14,
-    color: "#888",
+    fontSize: 10,
+    color: "#49e048",
     marginTop: 2,
   },
   orderStatusProcessing: {
-    fontSize: 14,
+    fontSize: 10,
     color: "#ff9800",
     marginTop: 2,
     fontWeight: "bold",
   },
   orderStatusCompleted: {
-    fontSize: 14,
+    fontSize: 10,
     color: "#4caf50",
     marginTop: 2,
     fontWeight: "bold",
   },
   orderAmount: {
-     fontSize: 16 ,
-    // fontWeight: "bold",
+     fontSize: 14 ,
+     fontWeight: "bold",
     // color: "#4caf50",
     marginLeft: 32,
   },
@@ -223,8 +223,24 @@ export const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: "600", marginTop: 10 },
   itemRow: { flexDirection: "row", marginVertical: 12 },
   itemQty: { marginRight: 10, fontSize: 16 },
-  itemName: { fontSize: 16 },
+  itemName: { fontSize: 14 },
   sizeText: { fontSize: 13, color: "#555" },
+
+  leftSection: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  itemAmount: {
+    fontSize: 14,    
+    textAlign: "right",
+    fontWeight: "400",
+  },
+  totalLabel: { fontSize: 16, fontWeight: "600" },
+  totalAmount: {
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "right",
+  },
 
   summaryBox: { marginTop: 20 },
 

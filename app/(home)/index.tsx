@@ -2,7 +2,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
 import { Text, View } from "react-native";
 import { fetchOrders } from "../../src/api/orders.api";
-import { WooOrder } from "../../src/type/wc_orders";
+import { Order, OrderStatus } from "../../src/type/orders";
 import styles from "../styles/styles";
 import OrderDetail from "./OrderDetail";
 
@@ -16,9 +16,9 @@ function parseDuration(durationStr: string): number {
 
 interface PizzaOrderState {
   timers: number[];
-  orders: WooOrder[];
+  orders: Order[];
   activeTab: number;
-  selectedOrder: WooOrder | null;
+  selectedOrder: Order | null;
 }
 
 class PizzaOrder extends Component<{}, PizzaOrderState> {
@@ -40,7 +40,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       console.log("Fetched orders:", orders);
       this.setState({
         orders,
-        timers: orders.map((order: WooOrder) => parseDuration(30 + " min")),
+        timers: orders.map((order: Order) => parseDuration(30 + " min")),
       });
       this.interval = setInterval(() => {
         this.setState((prevState) => ({
@@ -57,7 +57,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     if (this.interval) clearInterval(this.interval);
   }
 
-  handleOrderPress = (order: WooOrder) => {
+  handleOrderPress = (order: Order) => {
     this.setState({ selectedOrder: order });
   };
 
@@ -77,10 +77,12 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     const getFilteredOrders = () => {
       if (activeTab === 1) {
         return orders.filter(
-          (order: WooOrder) => order.status === "processing"
+          (order: Order) => order.status === OrderStatus.PROCESSING
         );
       } else if (activeTab === 2) {
-        return orders.filter((order: WooOrder) => order.status === "completed");
+        return orders.filter(
+          (order: Order) => order.status === OrderStatus.COMPLETED
+        );
       }
       return orders;
     };
@@ -109,31 +111,29 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
             </Text>
           ))}
         </View>
-        {filteredOrders.map((order: WooOrder, idx: number) => (
+        {filteredOrders.map((order: Order, idx: number) => (
           <View key={idx} style={styles.orderListItem}>
             <View style={styles.orderRow}>
               <View style={styles.orderStatusIconCircle}>
-                {order.status === "processing" ? (
+                {order.status === OrderStatus.PROCESSING ? (
                   <FontAwesome
                     name="hourglass-half"
                     size={16}
                     color="#ff9800"
                   />
-                ) : order.status === "completed" ? (
+                ) : order.status === OrderStatus.COMPLETED ? (
                   <FontAwesome name="check-circle" size={20} color="#4caf50" />
                 ) : (
                   <FontAwesome name="shopping-bag" size={20} color="#333" />
                 )}
               </View>
               <View style={styles.orderLeftAdjusted}>
-                <Text style={styles.customerName}>
-                  {order.billing.first_name}
-                </Text>
+                <Text style={styles.customerName}>{order.customer.name}</Text>
                 <Text
                   style={
-                    order.status === "processing"
+                    order.status === OrderStatus.PROCESSING
                       ? styles.orderStatusProcessing
-                      : order.status === "completed"
+                      : order.status === OrderStatus.COMPLETED
                       ? styles.orderStatusCompleted
                       : styles.orderStatus
                   }

@@ -1,23 +1,27 @@
 import { WooOrder } from "@/src/type/wc_orders";
+import { Order } from "../type/orders";
 
 const CONSUMER_KEY = process.env.EXPO_PUBLIC_WC_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.EXPO_PUBLIC_WC_CONSUMER_SECRET;
+const SUPABASE_KEY =
+  process.env.EXPO_PUBLIC_KITCHEN_APP_API_KEY ||
+  "sk_Cq4bSazW9r1BkDknD0ii4sqEWo0kWYpn";
 
-export async function fetchOrders(): Promise<WooOrder[]> {
-  console.log("Fetching orders from API...");
-  if (!CONSUMER_KEY || !CONSUMER_SECRET) {
-    throw new Error(
-      "WooCommerce API keys are not set in environment variables."
-    );
+export async function fetchOrders(): Promise<Order[]> {
+  console.log("Fetching supbase orders from API  ...");
+  if (!SUPABASE_KEY) {
+    throw new Error("Supabase API key is not set in environment variables.");
   }
   const url = `https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1/get_active_orders`;
   const config = {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": process.env.EXPO_PUBLIC_KITCHEN_APP_API_KEY || "",
+      "x-api-key": SUPABASE_KEY,
     },
   };
+
+  console.log("Using API key:", SUPABASE_KEY);
 
   try {
     const response = await fetch(url, config);
@@ -66,14 +70,3 @@ export async function fetchWooCommerceOrders(): Promise<WooOrder[]> {
     );
   }
 }
-
-const response = await fetch(
-  "https://PROJECT_ID.supabase.co/functions/v1/get_active_orders",
-  {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": "sk_live_pizza_kitchen_123",
-    },
-  }
-);

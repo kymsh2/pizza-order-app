@@ -1,11 +1,11 @@
 import React from "react";
 import { Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { WooOrder } from "../../src/type/wc_orders";
+import { Order } from "../../src/type/orders";
 import styles from "../styles/styles";
 
 interface OrderDetailProps {
-  order: WooOrder;
+  order: Order;
 }
 
 const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
@@ -13,9 +13,6 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
 
   return (
     <View style={styles.orderDetailContainer}>
-      {/* Top price + status */}
-      <Text style={styles.totalText}>{order.total}</Text>
-
       <View style={styles.statusBadge}>
         <Icon name="check" size={18} color="green" />
         <Text style={styles.statusText}>{order.status}</Text>
@@ -24,32 +21,30 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
       {/* Order meta section */}
       <View style={styles.metaBox}>
         <Row label="ID" value={order.id} />
-        <Row label="Placed on" value={order.date_created} />
-        <Row label="Accepted on" value={order.date_modified} />
-        <Row label="Fulfillment" value={order.date_completed} />
+        <Row label="Placed on" value={order.created_at} />
+        <Row label="Accepted on" value={order.accepted_at} />
+        <Row label="Fulfillment" value={order.completed_at} />
       </View>
 
       {/* Customer section */}
       <View style={styles.customerBox}>
-        <Text style={styles.customerName}>
-          {order.billing.first_name} {order.billing.last_name}
-        </Text>
+        <Text style={styles.customerName}>{order.customer.name}</Text>
 
-        {order.billing.first_name && (
+        {order.customer.first_order && (
           <Text style={styles.firstOrder}>★ 1st order</Text>
         )}
 
         <View style={styles.rowIcon}>
           <Icon name="phone" size={18} />
-          <Text style={styles.contactText}>{order.billing.phone}</Text>
+          <Text style={styles.contactText}>{order.customer.phone}</Text>
         </View>
 
         <View style={styles.rowIcon}>
           <Icon name="email" size={18} />
-          <Text style={styles.contactText}>{order.billing.email}</Text>
+          <Text style={styles.contactText}>{order.customer.email}</Text>
         </View>
 
-        {order.billing.first_name && (
+        {order.customer.first_order && (
           <Text style={styles.note}>
             First time order! You may want to confirm by calling.
           </Text>
@@ -59,32 +54,49 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
       {/* Order items */}
       <Text style={styles.sectionTitle}>Order items</Text>
 
-      {order.line_items.map((item, index) => (
+      {order.items.map((item, index) => (
         <View key={index} style={styles.itemRow}>
-          <Text style={styles.itemQty}>{item.quantity} x</Text>
-          <View>
-            <Text style={styles.itemName}>{item.name}</Text>
-            {item.size && (
-              <Text style={styles.sizeText}>Size: {item.size}</Text>
-            )}
+          {/* Left side: Qty + Name */}
+          <View style={styles.leftSection}>
+            <Text style={styles.itemQty}>{item.quantity} x</Text>
+
+            <View>
+              <Text style={styles.itemName}>{item.name}</Text>
+              {item.size && (
+                <Text style={styles.sizeText}>Size: {item.size}</Text>
+              )}
+            </View>
           </View>
+
+          {/* Right side: Amount */}
+          <Text style={styles.itemAmount}>${item.total?.toFixed(2)}</Text>
         </View>
       ))}
 
       <View style={styles.summaryBox}>
-        <Row label="Sub-Total" value={order.total} />
-        <Row label="Total" value={order.total} bold />
+        <View style={styles.itemRow}>
+          {/* Left side: Total label */}
+          <View style={styles.leftSection}>
+            <View>
+              <Text style={styles.totalLabel}>Total</Text>
+            </View>
+          </View>
+
+          {/* Right side: Total Amount */}
+          <Text style={styles.totalAmount}>${order.total.toFixed(2)}</Text>
+        </View>
       </View>
     </View>
   );
 };
 
-const Row = ({ label, value, bold }: any) => (
+const Row = ({ label, value, bold, dollarsign }: any) => (
   <View style={styles.row}>
     <Text style={[styles.rowLabel, bold && { fontWeight: "bold" }]}>
       {label}:
     </Text>
     <Text style={[styles.rowValue, bold && { fontWeight: "bold" }]}>
+      {dollarsign && "$"}
       {value}
     </Text>
   </View>

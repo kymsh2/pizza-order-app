@@ -4,7 +4,6 @@ export enum OrderStatus {
   ACCEPTED = "ACCEPTED",
   CANCELLED = "CANCELLED",
   COMPLETED = "COMPLETED",
-  PROCESSING = "PROCESSING",
 }
 
 export interface Customer {

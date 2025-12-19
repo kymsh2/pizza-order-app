@@ -119,20 +119,21 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#222",
   },
-   orderStatus: {
-    fontSize: 10,
-    color: "#49e048",
+   orderStatusNew: {
+    fontSize: 12,
+    color: "#71dc62",
     marginTop: 2,
+    fontWeight: "bold",
   },
-  orderStatusProcessing: {
+  orderStatusAccepted: {
     fontSize: 10,
-    color: "#ff9800",
+    color: "#ff8204",
     marginTop: 2,
     fontWeight: "bold",
   },
   orderStatusCompleted: {
     fontSize: 10,
-    color: "#4caf50",
+    color: "#505050",
     marginTop: 2,
     fontWeight: "bold",
   },
@@ -245,6 +246,84 @@ export const styles = StyleSheet.create({
   summaryBox: { marginTop: 20 },
 
   ///////////////////////////////////////////
+
+
+
+/* =========================
+     ACTION BUTTONS
+  ========================== */
+
+  acceptButton: {
+    backgroundColor: "#2e7d32", // green
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10
+  },
+
+  acceptButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    letterSpacing: 0.5
+  },
+
+  cancelButton: {
+    backgroundColor: "#b71c1c", // red
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center"
+  },
+
+  cancelButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600"
+  },
+
+  /* =========================
+     PICKUP TIME SELECTOR
+  ========================== */
+
+  timeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginVertical: 12
+  },
+
+  timeButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#f9f9f9",
+    minWidth: 70,
+    alignItems: "center"
+  },
+
+  timeButtonSelected: {
+    backgroundColor: "#2e7d32",
+    borderColor: "#2e7d32"
+  },
+
+  timeButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#333"
+  },
+
+  ///////////////////
+
+  pickupTimerText: {
+    marginTop: 4,
+    fontSize: 11,
+    color: "#ff9800",
+    fontWeight: "600"
+  }
+
+
 });
 
 export default styles;

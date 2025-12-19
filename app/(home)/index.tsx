@@ -1,3 +1,4 @@
+import { convertUtcToLocal } from "@/src/utils/dates-helper";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
 import { Text, View } from "react-native";
@@ -6,19 +7,11 @@ import { Order, OrderStatus } from "../../src/type/orders";
 import styles from "../styles/styles";
 import OrderDetail from "./OrderDetail";
 
-function parseDuration(durationStr: string): number {
-  const [value, unit] = durationStr.split(" ");
-  const num = parseInt(value, 10);
-  if (unit.startsWith("min")) return num * 60;
-  if (unit.startsWith("sec")) return num;
-  return 0;
-}
-
 interface PizzaOrderState {
-  timers: number[];
   orders: Order[];
   activeTab: number;
   selectedOrder: Order | null;
+  now: number;
 }
 
 class PizzaOrder extends Component<{}, PizzaOrderState> {
@@ -27,10 +20,10 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      timers: [],
       orders: [],
       activeTab: 0,
       selectedOrder: null,
+      now: Date.now(),
     };
   }
 
@@ -38,15 +31,11 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     try {
       const orders = await fetchOrders();
       console.log("Fetched orders:", orders);
-      this.setState({
-        orders,
-        timers: orders.map((order: Order) => parseDuration(30 + " min")),
-      });
+      this.setState({ orders, now: Date.now() });
+
       this.interval = setInterval(() => {
-        this.setState((prevState) => ({
-          timers: prevState.timers.map((t: number) => (t > 0 ? t - 1 : 0)),
-        }));
-      }, 1000);
+        this.setState({ now: Date.now() });
+      }, 60000); // every minute
     } catch (error: any) {
       // Optionally handle error state here
       console.error("Failed to fetch orders:", error);
@@ -65,19 +54,13 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     this.setState({ selectedOrder: null });
   };
 
-  formatTime(seconds: number): string {
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    return `${min}:${sec.toString().padStart(2, "0")}`;
-  }
-
   render() {
-    const { orders, timers, activeTab, selectedOrder } = this.state;
+    const { orders, activeTab, selectedOrder } = this.state;
     const tabNames = ["All", "In progress", "Ready"];
     const getFilteredOrders = () => {
       if (activeTab === 1) {
         return orders.filter(
-          (order: Order) => order.status === OrderStatus.PROCESSING
+          (order: Order) => order.status === OrderStatus.ACCEPTED
         );
       } else if (activeTab === 2) {
         return orders.filter(
@@ -115,7 +98,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
           <View key={idx} style={styles.orderListItem}>
             <View style={styles.orderRow}>
               <View style={styles.orderStatusIconCircle}>
-                {order.status === OrderStatus.PROCESSING ? (
+                {order.status === OrderStatus.ACCEPTED ? (
                   <FontAwesome
                     name="hourglass-half"
                     size={16}
@@ -126,16 +109,25 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
                 ) : (
                   <FontAwesome name="shopping-bag" size={20} color="#333" />
                 )}
+
+                {/* ⏱ Pickup Timer */}
+                {order.status === OrderStatus.ACCEPTED &&
+                  this.getRemainingMinutes(order) !== null &&
+                  this.getRemainingMinutes(order)! > 0 && (
+                    <Text style={styles.pickupTimerText}>
+                      {this.getRemainingMinutes(order)} min
+                    </Text>
+                  )}
               </View>
               <View style={styles.orderLeftAdjusted}>
                 <Text style={styles.customerName}>{order.customer.name}</Text>
                 <Text
                   style={
-                    order.status === OrderStatus.PROCESSING
-                      ? styles.orderStatusProcessing
+                    order.status === OrderStatus.ACCEPTED
+                      ? styles.orderStatusAccepted
                       : order.status === OrderStatus.COMPLETED
                       ? styles.orderStatusCompleted
-                      : styles.orderStatus
+                      : styles.orderStatusNew
                   }
                 >
                   {order.status}
@@ -155,6 +147,28 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
         ))}
       </View>
     );
+  }
+
+  getRemainingMinutes(order: Order): number | null {
+    if (order.status !== OrderStatus.ACCEPTED || !order.pickup_at) {
+      return null;
+    }
+    const pickupTimeUtcStr = order.pickup_at + "Z";
+    console.log("pickupTimeUtcStr:", pickupTimeUtcStr);
+    console.log("pickupTimeLocal:", convertUtcToLocal(pickupTimeUtcStr));
+    const pickupTime = new Date(pickupTimeUtcStr).getTime();
+    const diffMs = pickupTime - this.state.now;
+    const diffMin = Math.ceil(diffMs / 60000);
+    console.log(
+      "Remaining minutes for order",
+      order.id,
+      ":",
+      pickupTime,
+      diffMs,
+      diffMin
+    );
+
+    return diffMin > 0 ? diffMin : 0;
   }
 }
 

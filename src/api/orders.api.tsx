@@ -1,11 +1,52 @@
 import { WooOrder } from "@/src/type/wc_orders";
-import { Order } from "../type/orders";
+import { AcceptOrderResponse, Order } from "../type/orders";
 
 const CONSUMER_KEY = process.env.EXPO_PUBLIC_WC_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.EXPO_PUBLIC_WC_CONSUMER_SECRET;
 const SUPABASE_KEY =
   process.env.EXPO_PUBLIC_KITCHEN_APP_API_KEY ||
   "sk_Cq4bSazW9r1BkDknD0ii4sqEWo0kWYpn";
+
+export async function acceptOrder(
+  orderId: string,
+  prepMinutes: number
+): Promise<AcceptOrderResponse> {
+  console.log("Accepting order via Supabase function...");
+  if (!SUPABASE_KEY) {
+    throw new Error("Supabase API key is not set in environment variables.");
+  }
+
+  const url = `https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1/accept-order`;
+
+  const config = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": SUPABASE_KEY,
+    },
+    body: JSON.stringify({
+      order_id: orderId,
+      prep_minutes: prepMinutes,
+    }),
+  };
+
+  console.log("Using API key:", SUPABASE_KEY);
+
+  try {
+    const response = await fetch(url, config);
+    if (!response.ok) {
+      throw new Error(
+        `Network response was not ok: ${response.status} ${response.statusText}`
+      );
+    }
+    return await response.json();
+  } catch (error: any) {
+    console.error("Error fetching orders:", error);
+    throw new Error(
+      error?.message || "Unknown error occurred while fetching orders"
+    );
+  }
+}
 
 export async function fetchOrders(): Promise<Order[]> {
   console.log("Fetching supbase orders from API  ...");

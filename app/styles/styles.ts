@@ -109,11 +109,36 @@ export const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f2f2f2',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
+    // marginBottom: 18,
+    position: "relative", // REQUIRED
   },
+  orderStatusWrapper: {
+    alignItems: "center",
+    width: 40, // keeps layout stable
+  },
+  orderStatusIcon: {
+    position: "absolute", // 🔒 LOCK ICON
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    textAlignVertical: "center", // Android
+    alignSelf: "center",
+  },
+  pickupTimerText: {
+    marginTop: 6,
+    fontSize: 11,
+    color: "#ff6d01",
+    fontWeight: "600"
+  },
+
+   //////////////////
+
   customerName: {
     fontSize: 16,
     fontWeight: "600",
@@ -127,7 +152,7 @@ export const styles = StyleSheet.create({
   },
   orderStatusAccepted: {
     fontSize: 10,
-    color: "#ff8204",
+    color: "#ff6d01",
     marginTop: 2,
     fontWeight: "bold",
   },
@@ -316,12 +341,30 @@ export const styles = StyleSheet.create({
 
   ///////////////////
 
-  pickupTimerText: {
-    marginTop: 4,
-    fontSize: 11,
-    color: "#ff9800",
-    fontWeight: "600"
-  }
+  
+  /////////////
+
+  // 🔴 DEBUG STYLES — REMOVE AFTER FIX
+debugRed: {
+  borderWidth: 1,
+  borderColor: "red",
+},
+
+debugBlue: {
+  borderWidth: 1,
+  borderColor: "blue",
+},
+
+debugGreen: {
+  borderWidth: 1,
+  borderColor: "green",
+},
+
+debugYellow: {
+  borderWidth: 1,
+  borderColor: "orange",
+},
+////////////////////
 
 
 });

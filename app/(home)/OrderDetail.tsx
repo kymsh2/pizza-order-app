@@ -1,18 +1,20 @@
 import { acceptOrder } from "@/src/api/orders.api";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
+import { getStatusColor } from "@/src/utils/status-helper";
 import React, { useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { AcceptOrderResponse, Order } from "../../src/type/orders";
+import { AcceptOrderResponse, Order, OrderStatus } from "../../src/type/orders";
 import styles from "../styles/styles";
 
 interface OrderDetailProps {
   order: Order;
+  onOrderUpdated: (updatedOrder: Order) => void;
 }
 
 const PREP_TIME_OPTIONS = [5, 10, 15, 20, 30, 45, 60, 90];
 
-const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
+const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
   if (!order) return <Text>No order found.</Text>;
 
   /**
@@ -39,6 +41,15 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
       }
 
       // success → UI should refresh from parent list
+      console.log("Order accepted:", res.order.id);
+      onOrderUpdated({
+        ...order,
+        status: OrderStatus.ACCEPTED,
+        accepted_at: res.order.accepted_at,
+        pickup_at: res.order.pickup_at,
+        prep_minutes: res.order.prep_minutes,
+      });
+
       setShowPickupSelector(false);
     } catch (err: any) {
       setError("Failed to accept order");
@@ -49,10 +60,14 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order }) => {
   };
 
   return (
-    <View style={styles.orderDetailContainer}>
-      <View style={styles.statusBadge}>
-        <Icon name="check" size={18} color="green" />
-        <Text style={styles.statusText}>{order.status}</Text>
+    <View style={[styles.orderDetailContainer]}>
+      <View style={[styles.statusBadge, { backgroundColor: "#faf4e2" }]}>
+        <Icon name="check" size={18} color={getStatusColor(order.status)} />
+        <Text
+          style={[styles.statusText, { color: getStatusColor(order.status) }]}
+        >
+          {order.status}
+        </Text>
       </View>
 
       {/* Order meta section */}

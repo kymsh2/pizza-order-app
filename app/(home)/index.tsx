@@ -2,7 +2,7 @@ import { convertUtcToLocal } from "@/src/utils/dates-helper";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
 import { Text, View } from "react-native";
-import { fetchOrders } from "../../src/api/orders.api";
+import { completeOrder, fetchOrders } from "../../src/api/orders.api";
 import { Order, OrderStatus } from "../../src/type/orders";
 import styles from "../styles/styles";
 import OrderDetail from "./OrderDetail";
@@ -31,10 +31,21 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     try {
       const orders = await fetchOrders();
       console.log("Fetched orders:", orders);
-      this.setState({ orders, now: Date.now() });
+      // Automatically complete orders that are ready
+      const updatedOrders = this.processCompletedOrders(orders);
+      this.setState({ orders: updatedOrders, now: Date.now() });
 
+      // Every minute, automatically complete orders that are ready
       this.interval = setInterval(() => {
-        this.setState({ now: Date.now() });
+        this.setState((prevState) => {
+          const updatedOrders = this.processCompletedOrders(prevState.orders);
+          return {
+            // Update the orders list if there are changes
+            orders: updatedOrders.length > 0 ? updatedOrders : prevState.orders,
+            // Update the current time
+            now: Date.now(),
+          };
+        });
       }, 60000); // every minute
     } catch (error: any) {
       // Optionally handle error state here
@@ -48,6 +59,15 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
   handleOrderPress = (order: Order) => {
     this.setState({ selectedOrder: order });
+  };
+
+  handleOrderUpdated = (updatedOrder: Order) => {
+    this.setState((prev) => ({
+      orders: prev.orders.map((o) =>
+        o.id === updatedOrder.id ? updatedOrder : o
+      ),
+      selectedOrder: updatedOrder,
+    }));
   };
 
   handleBack = () => {
@@ -76,7 +96,10 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
           <Text style={styles.heading} onPress={this.handleBack}>
             ← Back
           </Text>
-          <OrderDetail order={selectedOrder} />
+          <OrderDetail
+            order={selectedOrder}
+            onOrderUpdated={this.handleOrderUpdated}
+          />
         </View>
       );
     }
@@ -95,20 +118,29 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
           ))}
         </View>
         {filteredOrders.map((order: Order, idx: number) => (
-          <View key={idx} style={styles.orderListItem}>
+          <View key={idx} style={[styles.orderListItem]}>
             <View style={styles.orderRow}>
-              <View style={styles.orderStatusIconCircle}>
-                {order.status === OrderStatus.ACCEPTED ? (
+              <View style={styles.orderStatusWrapper}>
+                <View style={styles.orderStatusIconCircle}>
                   <FontAwesome
-                    name="hourglass-half"
+                    name={
+                      order.status === OrderStatus.ACCEPTED
+                        ? "hourglass-half"
+                        : order.status === OrderStatus.COMPLETED
+                        ? "check-circle"
+                        : "shopping-bag"
+                    }
                     size={16}
-                    color="#ff9800"
+                    color={
+                      order.status === OrderStatus.ACCEPTED
+                        ? "#ff6d01"
+                        : order.status === OrderStatus.COMPLETED
+                        ? "#1c39bb"
+                        : "#333"
+                    }
+                    style={styles.orderStatusIcon}
                   />
-                ) : order.status === OrderStatus.COMPLETED ? (
-                  <FontAwesome name="check-circle" size={20} color="#4caf50" />
-                ) : (
-                  <FontAwesome name="shopping-bag" size={20} color="#333" />
-                )}
+                </View>
 
                 {/* ⏱ Pickup Timer */}
                 {order.status === OrderStatus.ACCEPTED &&
@@ -149,11 +181,16 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     );
   }
 
+  // Calculate remaining minutes for accepted orders
   getRemainingMinutes(order: Order): number | null {
-    if (order.status !== OrderStatus.ACCEPTED || !order.pickup_at) {
+    let pickupAt = order.pickup_at;
+
+    if (order.status !== OrderStatus.ACCEPTED || !pickupAt) {
       return null;
     }
-    const pickupTimeUtcStr = order.pickup_at + "Z";
+
+    const pickupTimeUtcStr =
+      pickupAt[pickupAt.length - 1] === "Z" ? pickupAt : pickupAt + "Z";
     console.log("pickupTimeUtcStr:", pickupTimeUtcStr);
     console.log("pickupTimeLocal:", convertUtcToLocal(pickupTimeUtcStr));
     const pickupTime = new Date(pickupTimeUtcStr).getTime();
@@ -169,6 +206,34 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     );
 
     return diffMin > 0 ? diffMin : 0;
+  }
+
+  // Automatically complete orders that are ready
+  processCompletedOrders(orders: Order[]): Order[] {
+    let hasChanges = false;
+
+    const updatedOrders = orders.map((order) => {
+      if (order.status !== OrderStatus.ACCEPTED) return order;
+
+      const remaining = this.getRemainingMinutes(order);
+
+      if (remaining! <= 0) {
+        hasChanges = true;
+
+        // 🔄 Fire & forget backend update
+        completeOrder(order.id);
+
+        return {
+          ...order,
+          status: OrderStatus.COMPLETED,
+          completed_at: new Date().toISOString(),
+        };
+      }
+
+      return order;
+    });
+
+    return updatedOrders;
   }
 }
 

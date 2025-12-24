@@ -1,6 +1,8 @@
 import { WooOrder } from "@/src/type/wc_orders";
 import { AcceptOrderResponse, Order } from "../type/orders";
 
+const SUBABASE_URL_BASE =
+  "https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1";
 const CONSUMER_KEY = process.env.EXPO_PUBLIC_WC_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.EXPO_PUBLIC_WC_CONSUMER_SECRET;
 const SUPABASE_KEY =
@@ -16,7 +18,7 @@ export async function acceptOrder(
     throw new Error("Supabase API key is not set in environment variables.");
   }
 
-  const url = `https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1/accept-order`;
+  const url = `${SUBABASE_URL_BASE}/accept-order`;
 
   const config = {
     method: "POST",
@@ -53,7 +55,7 @@ export async function fetchOrders(): Promise<Order[]> {
   if (!SUPABASE_KEY) {
     throw new Error("Supabase API key is not set in environment variables.");
   }
-  const url = `https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1/get_active_orders`;
+  const url = `${SUBABASE_URL_BASE}/get_active_orders`;
   const config = {
     method: "GET",
     headers: {
@@ -84,6 +86,31 @@ export async function fetchOrders(): Promise<Order[]> {
   }
 }
 
+export async function completeOrder(orderId: string) {
+  const url = `${SUBABASE_URL_BASE}/complete_order`;
+  const config = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": SUPABASE_KEY,
+    },
+    body: JSON.stringify({ order_id: orderId }),
+  };
+
+  console.log("completeOrder using API key:", SUPABASE_KEY);
+  try {
+    const response = await fetch(url, config);
+    if (!response.ok) {
+      throw new Error(
+        `Network response was not ok: ${response.status} ${response.statusText}`
+      );
+    }
+  } catch (err) {
+    console.error("Failed to complete order:", err);
+  }
+}
+
+/** not used in app ***/
 export async function fetchWooCommerceOrders(): Promise<WooOrder[]> {
   console.log("Fetching orders from API...");
   if (!CONSUMER_KEY || !CONSUMER_SECRET) {

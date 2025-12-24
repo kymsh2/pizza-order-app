@@ -1,10 +1,4 @@
-- name: Debug secret length
-  run: |
-    echo "Key length: ${#SUPABASE_SERVICE_ROLE_KEY}"
-  env:
-    SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
-- name: Sync Woo Orders
+name: Sync Woo Orders
 
 on:
   schedule:
@@ -15,6 +9,13 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      # 🔍 DEBUG STEP (temporary)
+      - name: Debug Supabase key length
+        run: |
+          echo "SUPABASE_SERVICE_ROLE_KEY length: ${#SUPABASE_SERVICE_ROLE_KEY}"
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          
       - name: Call Supabase Edge Function
         run: |
           curl -X POST https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1/new-orders -H "x-api-key: ${{secrets.SUPABASE_SERVICE_ROLE_KEY}}"

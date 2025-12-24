@@ -1,0 +1,16 @@
+name: Sync Woo Orders
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"   # every 5 minutes
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Supabase Edge Function
+        run: |
+          curl -X POST \          
+          https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1/new-orders \
+          -H "x-api-key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"

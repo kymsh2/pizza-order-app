@@ -1,4 +1,10 @@
-name: Sync Woo Orders
+- name: Debug secret length
+  run: |
+    echo "Key length: ${#SUPABASE_SERVICE_ROLE_KEY}"
+  env:
+    SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+- name: Sync Woo Orders
 
 on:
   schedule:

@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Call Supabase Edge Function
         run: |
-          curl -X POST https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1/new-orders -H "x-api-key: secrets.SUPABASE_SERVICE_ROLE_KEY"
+          curl -X POST https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1/new-orders -H "x-api-key: ${{secrets.SUPABASE_SERVICE_ROLE_KEY}}"

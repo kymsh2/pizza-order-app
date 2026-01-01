@@ -5,10 +5,11 @@ const SUBABASE_URL_BASE =
   "https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1";
 const CONSUMER_KEY = process.env.EXPO_PUBLIC_WC_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.EXPO_PUBLIC_WC_CONSUMER_SECRET;
-const SUPABASE_KEY =
-  process.env.EXPO_PUBLIC_KITCHEN_APP_API_KEY ||
-  "sk_Cq4bSazW9r1BkDknD0ii4sqEWo0kWYpn";
+const SUPABASE_KEY = process.env.EXPO_PUBLIC_KITCHEN_APP_API_KEY;
 
+/**********************
+ * Accept order
+ **********************/
 export async function acceptOrder(
   orderId: string,
   prepMinutes: number
@@ -49,6 +50,9 @@ export async function acceptOrder(
     );
   }
 }
+/**********************
+ * Fetch orders
+ **********************/
 
 export async function fetchOrders(): Promise<Order[]> {
   console.log("Fetching supbase orders from API  ...");
@@ -64,7 +68,7 @@ export async function fetchOrders(): Promise<Order[]> {
     },
   };
 
-  console.log("Using API key:", SUPABASE_KEY);
+  console.log("Using API key from env var:", SUPABASE_KEY);
 
   try {
     const response = await fetch(url, config);
@@ -85,6 +89,10 @@ export async function fetchOrders(): Promise<Order[]> {
     );
   }
 }
+
+/**********************
+ * Order completion
+ **********************/
 
 export async function completeOrder(orderId: string) {
   const url = `${SUBABASE_URL_BASE}/complete_order`;
@@ -111,6 +119,9 @@ export async function completeOrder(orderId: string) {
 }
 
 /** not used in app ***/
+/**********************
+ * Fetch WooCommerce orders
+ **********************/
 export async function fetchWooCommerceOrders(): Promise<WooOrder[]> {
   console.log("Fetching orders from API...");
   if (!CONSUMER_KEY || !CONSUMER_SECRET) {

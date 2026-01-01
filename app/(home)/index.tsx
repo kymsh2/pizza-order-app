@@ -1,7 +1,7 @@
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
-import { Text, View } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 import { completeOrder, fetchOrders } from "../../src/api/orders.api";
 import { Order, OrderStatus } from "../../src/type/orders";
 import styles from "../styles/styles";
@@ -103,6 +103,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
         </View>
       );
     }
+
     return (
       <View style={styles.container}>
         <Text style={styles.heading}>Orders</Text>
@@ -117,66 +118,67 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
             </Text>
           ))}
         </View>
-        {filteredOrders.map((order: Order, idx: number) => (
-          <View key={idx} style={[styles.orderListItem]}>
-            <View style={styles.orderRow}>
-              <View style={styles.orderStatusWrapper}>
-                <View style={styles.orderStatusIconCircle}>
-                  <FontAwesome
-                    name={
-                      order.status === OrderStatus.ACCEPTED
-                        ? "hourglass-half"
-                        : order.status === OrderStatus.COMPLETED
-                        ? "check-circle"
-                        : "shopping-bag"
-                    }
-                    size={16}
-                    color={
-                      order.status === OrderStatus.ACCEPTED
-                        ? "#ff6d01"
-                        : order.status === OrderStatus.COMPLETED
-                        ? "#1c39bb"
-                        : "#333"
-                    }
-                    style={styles.orderStatusIcon}
-                  />
+
+        <FlatList
+          data={filteredOrders}
+          keyExtractor={(item) => item.id}
+          style={{ flex: 1, width: "100%" }}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          renderItem={({ item: order }) => (
+            <Pressable
+              style={styles.orderListItem}
+              onPress={() => this.handleOrderPress(order)}
+            >
+              <View style={styles.orderRow}>
+                <View style={styles.orderStatusWrapper}>
+                  <View style={styles.orderStatusIconCircle}>
+                    <FontAwesome
+                      name={
+                        order.status === OrderStatus.ACCEPTED
+                          ? "hourglass-half"
+                          : order.status === OrderStatus.COMPLETED
+                          ? "check-circle"
+                          : "shopping-bag"
+                      }
+                      size={16}
+                      color={
+                        order.status === OrderStatus.ACCEPTED
+                          ? "#ff6d01"
+                          : order.status === OrderStatus.COMPLETED
+                          ? "#1c39bb"
+                          : "#333"
+                      }
+                    />
+                  </View>
+
+                  {order.status === OrderStatus.ACCEPTED &&
+                    this.getRemainingMinutes(order)! > 0 && (
+                      <Text style={styles.pickupTimerText}>
+                        {this.getRemainingMinutes(order)} min
+                      </Text>
+                    )}
                 </View>
 
-                {/* ⏱ Pickup Timer */}
-                {order.status === OrderStatus.ACCEPTED &&
-                  this.getRemainingMinutes(order) !== null &&
-                  this.getRemainingMinutes(order)! > 0 && (
-                    <Text style={styles.pickupTimerText}>
-                      {this.getRemainingMinutes(order)} min
-                    </Text>
-                  )}
+                <View style={styles.orderLeftAdjusted}>
+                  <Text style={styles.customerName}>{order.customer.name}</Text>
+                  <Text
+                    style={
+                      order.status === OrderStatus.ACCEPTED
+                        ? styles.orderStatusAccepted
+                        : order.status === OrderStatus.COMPLETED
+                        ? styles.orderStatusCompleted
+                        : styles.orderStatusNew
+                    }
+                  >
+                    {order.status}
+                  </Text>
+                </View>
+
+                <Text style={styles.orderAmount}>${order.total}</Text>
               </View>
-              <View style={styles.orderLeftAdjusted}>
-                <Text style={styles.customerName}>{order.customer.name}</Text>
-                <Text
-                  style={
-                    order.status === OrderStatus.ACCEPTED
-                      ? styles.orderStatusAccepted
-                      : order.status === OrderStatus.COMPLETED
-                      ? styles.orderStatusCompleted
-                      : styles.orderStatusNew
-                  }
-                >
-                  {order.status}
-                </Text>
-              </View>
-              <Text style={styles.orderAmount}>${order.total}</Text>
-            </View>
-            <View style={styles.orderOverlay}>
-              <Text
-                style={styles.orderOverlayText}
-                onPress={() => this.handleOrderPress(order)}
-              >
-                {/* Overlay for click */}
-              </Text>
-            </View>
-          </View>
-        ))}
+            </Pressable>
+          )}
+        />
       </View>
     );
   }
@@ -213,11 +215,30 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     let hasChanges = false;
 
     const updatedOrders = orders.map((order) => {
+      console.log(
+        "Processing order:",
+        order.id,
+        "-",
+        order.status,
+        "-",
+        order.accepted_at,
+        "-",
+        order.prep_minutes,
+        "-",
+        order.remaining_seconds
+      );
       if (order.status !== OrderStatus.ACCEPTED) return order;
 
       const remaining = this.getRemainingMinutes(order);
+      console.log(
+        "Remaining minutes for order.id ",
+        order.id,
+        " -> ",
+        remaining
+      );
 
       if (remaining! <= 0) {
+        console.log("Completing order:", order.id);
         hasChanges = true;
 
         // 🔄 Fire & forget backend update

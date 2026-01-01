@@ -3,8 +3,9 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: "100%",
     justifyContent: "center",
-    alignItems: "center",
+    // alignItems: "center",
     padding: 24,
   },
   title: {
@@ -56,7 +57,7 @@ export const styles = StyleSheet.create({
   tabsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    // alignItems: "center",
     marginBottom: 18,
     width: "100%",
     maxWidth: 320,
@@ -83,7 +84,7 @@ export const styles = StyleSheet.create({
   },
   orderListItem: {
     width: "100%",
-    maxWidth: 320,
+    // maxWidth: 320,
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 14,
@@ -98,7 +99,7 @@ export const styles = StyleSheet.create({
   orderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    // alignItems: "center",
   },
   orderLeftAdjusted: {
     flexDirection: 'column',

@@ -1,0 +1,17 @@
+name: Every Five Minutes Job
+
+on:
+  schedule:
+    # Runs every 5 minutes (the fastest interval allowed)
+    - cron: '*/5 * * * *'
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run a scheduled command
+      run: echo "This job ran at $(date -u) UTC"

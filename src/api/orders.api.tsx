@@ -1,11 +1,10 @@
 import { WooOrder } from "@/src/type/wc_orders";
 import { AcceptOrderResponse, Order } from "../type/orders";
 
-const SUBABASE_URL_BASE =
-  "https://bufiduycxibmrbtfsdkk.supabase.co/functions/v1";
+const SUBABASE_URL_BASE = process.env.EXPO_PUBLIC_SUBABASE_URL_BASE;
+const SUPABASE_KEY = process.env.EXPO_PUBLIC_KITCHEN_APP_API_KEY;
 const CONSUMER_KEY = process.env.EXPO_PUBLIC_WC_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.EXPO_PUBLIC_WC_CONSUMER_SECRET;
-const SUPABASE_KEY = process.env.EXPO_PUBLIC_KITCHEN_APP_API_KEY;
 
 /**********************
  * Accept order
@@ -32,8 +31,6 @@ export async function acceptOrder(
       prep_minutes: prepMinutes,
     }),
   };
-
-  console.log("Using API key:", SUPABASE_KEY);
 
   try {
     const response = await fetch(url, config);
@@ -67,8 +64,6 @@ export async function fetchOrders(): Promise<Order[]> {
       "x-api-key": SUPABASE_KEY,
     },
   };
-
-  console.log("Using API key from env var:", SUPABASE_KEY);
 
   try {
     const response = await fetch(url, config);
@@ -105,7 +100,6 @@ export async function completeOrder(orderId: string) {
     body: JSON.stringify({ order_id: orderId }),
   };
 
-  console.log("completeOrder using API key:", SUPABASE_KEY);
   try {
     const response = await fetch(url, config);
     if (!response.ok) {

@@ -1,3 +1,7 @@
+import {
+  subscribeToOrders,
+  unsubscribeFromOrders,
+} from "@/src/supabase/subscribe";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
@@ -16,6 +20,7 @@ interface PizzaOrderState {
 
 class PizzaOrder extends Component<{}, PizzaOrderState> {
   interval: ReturnType<typeof setInterval> | undefined;
+  realtimeChannel: any;
 
   constructor(props: {}) {
     super(props);
@@ -31,6 +36,14 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     try {
       const orders = await fetchOrders();
       console.log("Fetched orders:", orders);
+
+      // Set up real-time subscription for NEW orders
+      this.realtimeChannel = subscribeToOrders(async (order, event) => {
+        // refresh order list
+        const latestOrders = await fetchOrders();
+        this.setState({ orders: latestOrders });
+      });
+
       // Automatically complete orders that are ready
       const updatedOrders = this.processCompletedOrders(orders);
       this.setState({ orders: updatedOrders, now: Date.now() });
@@ -55,6 +68,10 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
   componentWillUnmount() {
     if (this.interval) clearInterval(this.interval);
+
+    if (this.realtimeChannel) {
+      unsubscribeFromOrders(this.realtimeChannel);
+    }
   }
 
   handleOrderPress = (order: Order) => {

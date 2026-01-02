@@ -1,10 +1,20 @@
 import { WooOrder } from "@/src/type/wc_orders";
+import Constants from "expo-constants";
 import { AcceptOrderResponse, Order } from "../type/orders";
 
-const SUBABASE_URL_BASE = process.env.EXPO_PUBLIC_SUBABASE_URL_BASE;
-const SUPABASE_KEY = process.env.EXPO_PUBLIC_KITCHEN_APP_API_KEY;
-const CONSUMER_KEY = process.env.EXPO_PUBLIC_WC_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.EXPO_PUBLIC_WC_CONSUMER_SECRET;
+const SUBABASE_URL_BASE = Constants.expoConfig?.extra?.env?.SUBABASE_URL_BASE;
+const SUPABASE_KEY = Constants.expoConfig?.extra?.env?.KITCHEN_APP_API_KEY;
+
+if (!SUBABASE_URL_BASE || !SUPABASE_KEY) {
+  throw new Error(
+    "Environment variables for supabase url and supabase key are not set."
+  );
+}
+
+const SUBABASE_FUNCTION_URL = SUBABASE_URL_BASE + "/functions/v1";
+
+const CONSUMER_KEY = "";
+const CONSUMER_SECRET = "";
 
 /**********************
  * Accept order
@@ -18,7 +28,7 @@ export async function acceptOrder(
     throw new Error("Supabase API key is not set in environment variables.");
   }
 
-  const url = `${SUBABASE_URL_BASE}/accept-order`;
+  const url = `${SUBABASE_FUNCTION_URL}/accept-order`;
 
   const config = {
     method: "POST",
@@ -56,7 +66,7 @@ export async function fetchOrders(): Promise<Order[]> {
   if (!SUPABASE_KEY) {
     throw new Error("Supabase API key is not set in environment variables.");
   }
-  const url = `${SUBABASE_URL_BASE}/get_active_orders`;
+  const url = `${SUBABASE_FUNCTION_URL}/get_active_orders`;
   const config = {
     method: "GET",
     headers: {
@@ -90,7 +100,7 @@ export async function fetchOrders(): Promise<Order[]> {
  **********************/
 
 export async function completeOrder(orderId: string) {
-  const url = `${SUBABASE_URL_BASE}/complete_order`;
+  const url = `${SUBABASE_FUNCTION_URL}/complete_order`;
   const config = {
     method: "POST",
     headers: {

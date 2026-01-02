@@ -2,7 +2,13 @@ import { acceptOrder } from "@/src/api/orders.api";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
 import { getStatusColor } from "@/src/utils/status-helper";
 import React, { useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { AcceptOrderResponse, Order, OrderStatus } from "../../src/type/orders";
 import styles from "../styles/styles";
@@ -60,7 +66,12 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
   };
 
   return (
-    <View style={[styles.orderDetailContainer]}>
+    <ScrollView
+      style={styles.orderDetailContainer}
+      contentContainerStyle={styles.orderDetailContent}
+      showsVerticalScrollIndicator={true}
+    >
+      {/* <View style={[styles.orderDetailContainer]}> */}
       <View style={[styles.statusBadge, { backgroundColor: "#faf4e2" }]}>
         <Icon name="check" size={18} color={getStatusColor(order.status)} />
         <Text
@@ -214,7 +225,8 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
           )}
         </View>
       )}
-    </View>
+      {/* </View> */}
+    </ScrollView>
   );
 };
 

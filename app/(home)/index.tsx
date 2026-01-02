@@ -7,9 +7,17 @@ import {
   playNewOrderSound,
   showNewOrderNotification,
 } from "@/src/utils/notifications";
+import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { completeOrder, fetchOrders } from "../../src/api/orders.api";
 import { Order, OrderStatus } from "../../src/type/orders";
 import styles from "../styles/styles";
@@ -20,6 +28,7 @@ interface PizzaOrderState {
   activeTab: number;
   selectedOrder: Order | null;
   now: number;
+  refreshing: boolean;
 }
 
 class PizzaOrder extends Component<{}, PizzaOrderState> {
@@ -33,6 +42,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       activeTab: 0,
       selectedOrder: null,
       now: Date.now(),
+      refreshing: false,
     };
   }
 
@@ -99,6 +109,20 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     this.setState({ selectedOrder: null });
   };
 
+  handleManualRefresh = async () => {
+    if (this.state.refreshing) return;
+    this.setState({ refreshing: true });
+
+    try {
+      const orders = await fetchOrders(); // your existing API
+      this.setState({ orders });
+    } catch (err) {
+      console.error("Manual refresh failed", err);
+    } finally {
+      this.setState({ refreshing: false });
+    }
+  };
+
   render() {
     const { orders, activeTab, selectedOrder } = this.state;
     const tabNames = ["All", "In progress", "Ready"];
@@ -117,8 +141,8 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     const filteredOrders = getFilteredOrders();
     if (selectedOrder) {
       return (
-        <View style={styles.container}>
-          <Text style={styles.heading} onPress={this.handleBack}>
+        <View style={[styles.container]}>
+          <Text style={[styles.backButton]} onPress={this.handleBack}>
             ← Back
           </Text>
           <OrderDetail
@@ -131,7 +155,23 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.heading}>Orders</Text>
+        {/* <Text style={styles.heading}>Orders</Text> */}
+        <View style={[styles.headerRow]}>
+          <Text style={styles.heading}>Orders</Text>
+
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={this.handleManualRefresh}
+            disabled={this.state.refreshing}
+          >
+            {this.state.refreshing ? (
+              <ActivityIndicator size="small" color="#ff6d01" />
+            ) : (
+              <Ionicons name="refresh" size={22} color="#ff6d01" />
+            )}
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.tabsContainer}>
           {tabNames.map((tab, idx) => (
             <Text
@@ -162,8 +202,10 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
                         order.status === OrderStatus.ACCEPTED
                           ? "hourglass-half"
                           : order.status === OrderStatus.COMPLETED
-                          ? "check-circle"
-                          : "shopping-bag"
+                          ? "shopping-bag"
+                          : order.status === OrderStatus.CANCELLED
+                          ? "minus"
+                          : "shopping-cart"
                       }
                       size={16}
                       color={
@@ -171,7 +213,9 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
                           ? "#ff6d01"
                           : order.status === OrderStatus.COMPLETED
                           ? "#1c39bb"
-                          : "#333"
+                          : order.status === OrderStatus.CANCELLED
+                          ? "#b71c1c"
+                          : "#71dc62"
                       }
                     />
                   </View>
@@ -192,6 +236,8 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
                         ? styles.orderStatusAccepted
                         : order.status === OrderStatus.COMPLETED
                         ? styles.orderStatusCompleted
+                        : order.status === OrderStatus.CANCELLED
+                        ? styles.orderStatusCancelled
                         : styles.orderStatusNew
                     }
                   >

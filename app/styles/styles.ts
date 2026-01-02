@@ -48,12 +48,54 @@ export const styles = StyleSheet.create({
     minWidth: 80,
     textAlign: "right",
   },
-  heading: {
-    fontSize: 28,
+
+  backButton: {
+    fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 18,
+    marginBottom: 28,
     alignSelf: "flex-start",
+
   },
+
+  heading: {
+    fontSize: 22,
+    fontWeight: "bold",
+    // marginBottom: 28,
+    // alignSelf: "flex-start",
+   
+    // fontSize: 20,
+    // fontWeight: "500",
+    // letterSpacing: 1,
+    // textTransform: "uppercase",
+    // color: "#444",
+
+    // fontSize: 22,
+    // fontWeight: "600",
+    // letterSpacing: 0.3,
+    // color: "#1a1a1a",
+  },
+
+  /***
+   * Styles for the Header Row
+   */
+
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+
+  refreshButton: {
+    padding: 6,
+  },
+
+
+/**
+ * Styles for the tabs container
+ */
+
   tabsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -146,7 +188,7 @@ export const styles = StyleSheet.create({
     color: "#222",
   },
    orderStatusNew: {
-    fontSize: 12,
+    fontSize: 10,
     color: "#71dc62",
     marginTop: 2,
     fontWeight: "bold",
@@ -158,6 +200,12 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   orderStatusCompleted: {
+    fontSize: 10,
+    color: "#505050",
+    marginTop: 2,
+    fontWeight: "bold",
+  },
+  orderStatusCancelled: {
     fontSize: 10,
     color: "#505050",
     marginTop: 2,
@@ -222,6 +270,10 @@ export const styles = StyleSheet.create({
 
   // ORDER DETAIL STYLES
   orderDetailContainer: { padding: 18, backgroundColor: "#fff" },
+  orderDetailContent: {
+    padding: 16,
+    paddingBottom: 40, // prevents bottom cutoff
+  },
 
 
   totalText: { fontSize: 26, fontWeight: "bold", marginBottom: 8 },

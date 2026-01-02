@@ -13,6 +13,7 @@
       "bundleIdentifier": "com.mahwajsolutions.crusteezpizza"
     },
     "android": {
+      "permissions": ["NOTIFICATIONS", "VIBRATE"],
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/icon.png",
@@ -21,6 +22,7 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.mahwajsolutions.crusteezpizza",
       "versionCode": 1
+      
     },
     "web": {
       "output": "static",

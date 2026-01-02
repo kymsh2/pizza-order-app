@@ -3,6 +3,10 @@ import {
   unsubscribeFromOrders,
 } from "@/src/supabase/subscribe";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
+import {
+  playNewOrderSound,
+  showNewOrderNotification,
+} from "@/src/utils/notifications";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
@@ -39,6 +43,10 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
       // Set up real-time subscription for NEW orders
       this.realtimeChannel = subscribeToOrders(async (order, event) => {
+        // Play sound and show notification for new orders
+        await playNewOrderSound();
+        await showNewOrderNotification(order.customer!.name || order.id);
+
         // refresh order list
         const latestOrders = await fetchOrders();
         this.setState({ orders: latestOrders });

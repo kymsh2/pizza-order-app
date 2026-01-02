@@ -32,7 +32,7 @@ export async function showNewOrderNotification(customerName: string) {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "🍕 New Order Received",
-      body: `Order from ${customerName}`,
+      body: `Order Id: ${customerName}`,
       sound: "default",
     },
     trigger: null, // immediate

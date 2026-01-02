@@ -55,7 +55,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       this.realtimeChannel = subscribeToOrders(async (order, event) => {
         // Play sound and show notification for new orders
         await playNewOrderSound();
-        await showNewOrderNotification(order.table);
+        await showNewOrderNotification(order.id);
 
         // refresh order list
         const latestOrders = await fetchOrders();
@@ -155,7 +155,6 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
     return (
       <View style={styles.container}>
-        {/* <Text style={styles.heading}>Orders</Text> */}
         <View style={[styles.headerRow]}>
           <Text style={styles.heading}>Orders</Text>
 

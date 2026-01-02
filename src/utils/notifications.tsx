@@ -1,5 +1,6 @@
 import { Audio } from "expo-av";
 import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 
 // Always show notification when received
 Notifications.setNotificationHandler({
@@ -25,6 +26,10 @@ export async function playNewOrderSound() {
 }
 
 export async function showNewOrderNotification(customerName: string) {
+  if (Platform.OS === "web") {
+    return; // ❌ no notifications on web
+  }
+
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "🍕 New Order Received",

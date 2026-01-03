@@ -116,7 +116,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
       <View style={styles.customerBox}>
         <Text style={styles.customerName}>{order.customer.name}</Text>
 
-        {order.customer.first_order && (
+        {order.first_order && (
           <Text style={styles.firstOrder}>★ 1st order</Text>
         )}
 
@@ -130,8 +130,8 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
           <Text style={styles.contactText}>{order.customer.email}</Text>
         </View>
 
-        {order.customer.first_order && (
-          <Text style={styles.note}>
+        {order.first_order && order.customer.phone && (
+          <Text style={styles.firstOrder}>
             First time order! You may want to confirm by calling.
           </Text>
         )}

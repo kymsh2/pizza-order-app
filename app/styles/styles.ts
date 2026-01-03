@@ -294,7 +294,7 @@ export const styles = StyleSheet.create({
 
   customerBox: { paddingVertical: 18 },
   // customerName: { fontSize: 18, fontWeight: "600" },
-  firstOrder: { color: "#007aff", marginBottom: 10 },
+  firstOrder: { color: "#ff6700", marginBottom: 10 },
   rowIcon: { flexDirection: "row", alignItems: "center", marginVertical: 4 },
   contactText: { marginLeft: 8, fontSize: 15 },
   note: { color: "#007aff", marginTop: 8, fontSize: 13 },

@@ -39,6 +39,7 @@ export interface Order {
   pickup_at?: string | null;
   prep_minutes?: number | null;
   remaining_seconds?: number | null;
+  first_order?: boolean;
   customer: Customer;
   items: OrderItem[];
   total: number;

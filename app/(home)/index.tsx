@@ -54,8 +54,12 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       // Set up real-time subscription for NEW orders
       this.realtimeChannel = subscribeToOrders(async (order, event) => {
         // Play sound and show notification for new orders
-        await playNewOrderSound();
-        await showNewOrderNotification(order.id);
+        try {
+          await playNewOrderSound();
+          await showNewOrderNotification(order.id);
+        } catch (error) {
+          console.log("Notification error:", error);
+        }
 
         // refresh order list
         const latestOrders = await fetchOrders();

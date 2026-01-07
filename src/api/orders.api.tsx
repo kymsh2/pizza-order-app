@@ -1,5 +1,7 @@
 import { WooOrder } from "@/src/type/wc_orders";
 import Constants from "expo-constants";
+import * as Device from "expo-device";
+import { Platform } from "react-native";
 import { AcceptOrderResponse, Order } from "../type/orders";
 
 const SUBABASE_URL_BASE = Constants.expoConfig?.extra?.env?.SUBABASE_URL_BASE;
@@ -15,6 +17,9 @@ const SUBABASE_FUNCTION_URL = SUBABASE_URL_BASE + "/functions/v1";
 
 const CONSUMER_KEY = "";
 const CONSUMER_SECRET = "";
+
+console.log(Device.modelName);
+console.log(Device.osName, Device.osVersion);
 
 /**********************
  * Accept order
@@ -119,6 +124,32 @@ export async function completeOrder(orderId: string) {
     }
   } catch (err) {
     console.error("Failed to complete order:", err);
+  }
+}
+
+/************************
+ * Save Expo Push Token
+ ************************/
+
+export async function savePushToken(token: String) {
+  const url = `${SUBABASE_FUNCTION_URL}/save_push_token`;
+
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": SUPABASE_KEY,
+      },
+      body: JSON.stringify({
+        expo_push_token: token,
+        device_name: Device.modelName,
+        platform: Platform.OS,
+      }),
+    });
+    console.log("Push token saved to Supabase");
+  } catch (err) {
+    console.error("Failed to save push token:", err);
   }
 }
 

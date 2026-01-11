@@ -1,7 +1,9 @@
 import { Audio } from "expo-av";
+import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { appError, appLog, appWarn } from "./logger";
 
 // Always show notification when received
 Notifications.setNotificationHandler({
@@ -46,15 +48,16 @@ export async function showNewOrderNotification(customerName: string) {
  * Returns Expo push token (string) or null
  */
 export async function registerForPushToken() {
+  appLog("Registering for push notifications");
   // Skip web — push notifications not supported / need VAPID
   if (Platform.OS === "web") {
-    console.log("Web platform detected — skipping push token registration");
+    appLog("Web platform detected — skipping push token registration");
     return null;
   }
 
   // Check device type
   if (!Device.isDevice) {
-    console.log("Push notifications require a real device");
+    appLog("Push notifications require a real device");
     return null;
   }
 
@@ -79,12 +82,27 @@ export async function registerForPushToken() {
   }
 
   if (finalStatus !== "granted") {
-    console.warn("Push notification permission not granted");
+    appWarn("Push notification permission not granted");
+    return null;
+  }
+
+  appLog("Constants.easConfig?.projectId:", Constants.easConfig?.projectId);
+  appLog(
+    "Constants.expoConfig?.extra?.eas?.projectId:",
+    Constants.expoConfig?.extra?.eas?.projectId
+  );
+
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+
+  if (!projectId) {
+    appError("Missing EAS projectId — cannot get push token");
     return null;
   }
 
   // 🔑 Get Expo Push Token
-  const token = await Notifications.getExpoPushTokenAsync();
+  const token = await Notifications.getExpoPushTokenAsync({ projectId });
+
+  appLog("token.data:", token.data);
 
   return token.data; // ← THIS is what backend needs
 }

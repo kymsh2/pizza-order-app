@@ -1,5 +1,6 @@
 import { acceptOrder } from "@/src/api/orders.api";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
+import { appLog } from "@/src/utils/logger";
 import { getStatusColor } from "@/src/utils/status-helper";
 import React, { useState } from "react";
 import {
@@ -47,7 +48,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
       }
 
       // success → UI should refresh from parent list
-      console.log("Order accepted:", res.order.id);
+      appLog("Order accepted:", res.order.id);
       onOrderUpdated({
         ...order,
         status: OrderStatus.ACCEPTED,
@@ -59,7 +60,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
       setShowPickupSelector(false);
     } catch (err: any) {
       setError("Failed to accept order");
-      console.error(err);
+      appError(err);
     } finally {
       setLoading(false);
     }

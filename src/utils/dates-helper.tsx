@@ -1,12 +1,12 @@
 import { format } from "date-fns";
 
 export const convertUtcToLocal = (utcDateStr: string): string => {
-  //console.log("Original UTC Date String:", utcDateStr);
+  //appLog("Original UTC Date String:", utcDateStr);
   // Append 'Z' to the end of the string to force UTC interpretation
   const utcDateObject: Date = new Date(utcDateStr);
 
   const formattedLocalDate: string = formatDateWithFns(utcDateObject);
-  //console.log("formattedLocalDate: ", formattedLocalDate);
+  //appLog("formattedLocalDate: ", formattedLocalDate);
 
   return formattedLocalDate;
 };

@@ -118,3 +118,8 @@ yarn-error.*
 *.tsbuildinfo
 
 # @end expo-cli
+
+*.firebase-adminsdk*.json
+*.crusteez-pizza-app-firebase-adminsdk-fbsvc-255a36bee8.*
+crusteez-pizza-app-firebase-adminsdk-fbsvc-255a36bee8.json
+google-services.json

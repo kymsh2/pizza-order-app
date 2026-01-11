@@ -3,6 +3,7 @@ import {
   unsubscribeFromOrders,
 } from "@/src/supabase/subscribe";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
+import { appLog } from "@/src/utils/logger";
 import {
   playNewOrderSound,
   showNewOrderNotification,
@@ -49,7 +50,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
   async componentDidMount() {
     try {
       const orders = await fetchOrders();
-      console.log("Fetched orders:", orders);
+      appLog("Fetched orders:", orders);
 
       // Set up real-time subscription for NEW orders
       this.realtimeChannel = subscribeToOrders(async (order, event) => {
@@ -58,7 +59,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
           await playNewOrderSound();
           await showNewOrderNotification(order.id);
         } catch (error) {
-          console.log("Notification error:", error);
+          appLog("Notification error:", error);
         }
 
         // refresh order list
@@ -84,7 +85,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       }, 60000); // every minute
     } catch (error: any) {
       // Optionally handle error state here
-      console.error("Failed to fetch orders:", error);
+      appLog("Failed to fetch orders:", error);
     }
   }
 
@@ -121,7 +122,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       const orders = await fetchOrders(); // your existing API
       this.setState({ orders });
     } catch (err) {
-      console.error("Manual refresh failed", err);
+      appError("Manual refresh failed", err);
     } finally {
       this.setState({ refreshing: false });
     }
@@ -267,12 +268,12 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
     const pickupTimeUtcStr =
       pickupAt[pickupAt.length - 1] === "Z" ? pickupAt : pickupAt + "Z";
-    console.log("pickupTimeUtcStr:", pickupTimeUtcStr);
-    console.log("pickupTimeLocal:", convertUtcToLocal(pickupTimeUtcStr));
+    appLog("pickupTimeUtcStr:", pickupTimeUtcStr);
+    appLog("pickupTimeLocal:", convertUtcToLocal(pickupTimeUtcStr));
     const pickupTime = new Date(pickupTimeUtcStr).getTime();
     const diffMs = pickupTime - this.state.now;
     const diffMin = Math.ceil(diffMs / 60000);
-    console.log(
+    appLog(
       "Remaining minutes for order",
       order.id,
       ":",
@@ -289,7 +290,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     let hasChanges = false;
 
     const updatedOrders = orders.map((order) => {
-      console.log(
+      appLog(
         "Processing order:",
         order.id,
         "-",
@@ -304,15 +305,10 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       if (order.status !== OrderStatus.ACCEPTED) return order;
 
       const remaining = this.getRemainingMinutes(order);
-      console.log(
-        "Remaining minutes for order.id ",
-        order.id,
-        " -> ",
-        remaining
-      );
+      appLog("Remaining minutes for order.id ", order.id, " -> ", remaining);
 
       if (remaining! <= 0) {
-        console.log("Completing order:", order.id);
+        appLog("Completing order:", order.id);
         hasChanges = true;
 
         // 🔄 Fire & forget backend update

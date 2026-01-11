@@ -14,7 +14,7 @@ export function subscribeToOrders(
         filter: "status=in.(NEW)",
       },
       (payload) => {
-        console.log("Realtime order event:", payload);
+        appLog("Realtime order event:", payload);
         onChange(payload.new, payload.eventType);
       }
     )

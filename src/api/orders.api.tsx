@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 import { AcceptOrderResponse, Order } from "../type/orders";
+import { appLog } from "../utils/logger";
 
 const SUBABASE_URL_BASE = Constants.expoConfig?.extra?.env?.SUBABASE_URL_BASE;
 const SUPABASE_KEY = Constants.expoConfig?.extra?.env?.KITCHEN_APP_API_KEY;
@@ -18,8 +19,8 @@ const SUBABASE_FUNCTION_URL = SUBABASE_URL_BASE + "/functions/v1";
 const CONSUMER_KEY = "";
 const CONSUMER_SECRET = "";
 
-console.log(Device.modelName);
-console.log(Device.osName, Device.osVersion);
+appLog(Device.modelName);
+appLog(Device.osName, Device.osVersion);
 
 /**********************
  * Accept order
@@ -28,7 +29,7 @@ export async function acceptOrder(
   orderId: string,
   prepMinutes: number
 ): Promise<AcceptOrderResponse> {
-  console.log("Accepting order via Supabase function...");
+  appLog("Accepting order via Supabase function...");
   if (!SUPABASE_KEY) {
     throw new Error("Supabase API key is not set in environment variables.");
   }
@@ -56,7 +57,7 @@ export async function acceptOrder(
     }
     return await response.json();
   } catch (error: any) {
-    console.error("Error fetching orders:", error);
+    appError("Error fetching orders:", error);
     throw new Error(
       error?.message || "Unknown error occurred while fetching orders"
     );
@@ -67,7 +68,7 @@ export async function acceptOrder(
  **********************/
 
 export async function fetchOrders(): Promise<Order[]> {
-  console.log("Fetching supbase orders from API  ...");
+  appLog("Fetching supbase orders from API  ...");
   if (!SUPABASE_KEY) {
     throw new Error("Supabase API key is not set in environment variables.");
   }
@@ -93,7 +94,7 @@ export async function fetchOrders(): Promise<Order[]> {
     }
     return data;
   } catch (error: any) {
-    console.error("Error fetching orders:", error);
+    appError("Error fetching orders:", error);
     throw new Error(
       error?.message || "Unknown error occurred while fetching orders"
     );
@@ -123,7 +124,7 @@ export async function completeOrder(orderId: string) {
       );
     }
   } catch (err) {
-    console.error("Failed to complete order:", err);
+    appError("Failed to complete order:", err);
   }
 }
 
@@ -147,9 +148,9 @@ export async function savePushToken(token: String) {
         platform: Platform.OS,
       }),
     });
-    console.log("Push token saved to Supabase");
+    appLog("Push token saved to Supabase");
   } catch (err) {
-    console.error("Failed to save push token:", err);
+    appError("Failed to save push token:", err);
   }
 }
 
@@ -158,7 +159,7 @@ export async function savePushToken(token: String) {
  * Fetch WooCommerce orders
  **********************/
 export async function fetchWooCommerceOrders(): Promise<WooOrder[]> {
-  console.log("Fetching orders from API...");
+  appLog("Fetching orders from API...");
   if (!CONSUMER_KEY || !CONSUMER_SECRET) {
     throw new Error(
       "WooCommerce API keys are not set in environment variables."
@@ -178,7 +179,7 @@ export async function fetchWooCommerceOrders(): Promise<WooOrder[]> {
     }
     return data;
   } catch (error: any) {
-    console.error("Error fetching orders:", error);
+    appError("Error fetching orders:", error);
     throw new Error(
       error?.message || "Unknown error occurred while fetching orders"
     );

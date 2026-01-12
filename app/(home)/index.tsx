@@ -1,12 +1,9 @@
-import {
-  subscribeToOrders,
-  unsubscribeFromOrders,
-} from "@/src/supabase/subscribe";
+import { unsubscribeFromOrders } from "@/src/supabase/subscribe";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
-import { appLog } from "@/src/utils/logger";
+import { appError, appLog } from "@/src/utils/logger";
 import {
-  playNewOrderSound,
-  showNewOrderNotification,
+  addNotificationReceivedListener,
+  addNotificationResponseListener,
 } from "@/src/utils/notifications";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -49,23 +46,36 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
   async componentDidMount() {
     try {
+      //fetch at startup
       const orders = await fetchOrders();
       appLog("Fetched orders:", orders);
 
-      // Set up real-time subscription for NEW orders
-      this.realtimeChannel = subscribeToOrders(async (order, event) => {
-        // Play sound and show notification for new orders
-        try {
-          await playNewOrderSound();
-          await showNewOrderNotification(order.id);
-        } catch (error) {
-          appLog("Notification error:", error);
-        }
-
-        // refresh order list
-        const latestOrders = await fetchOrders();
-        this.setState({ orders: latestOrders });
+      // Listen for push notifications received while app is in foreground
+      const subReceived = addNotificationReceivedListener(() => {
+        console.log("📩 Push notification received in foreground");
+        fetchOrders();
       });
+
+      // Listen for push notification taps
+      const subTapped = addNotificationResponseListener(() => {
+        console.log("📲 Notification tapped");
+        fetchOrders();
+      });
+
+      // // Set up real-time subscription for NEW orders
+      // this.realtimeChannel = subscribeToOrders(async (order, event) => {
+      //   // Play sound and show notification for new orders
+      //   try {
+      //     await playNewOrderSound();
+      //     await showNewOrderNotification(order.id);
+      //   } catch (error) {
+      //     appLog("Notification error:", error);
+      //   }
+
+      //   // refresh order list
+      //   const latestOrders = await fetchOrders();
+      //   this.setState({ orders: latestOrders });
+      // });
 
       // Automatically complete orders that are ready
       const updatedOrders = this.processCompletedOrders(orders);
@@ -83,6 +93,12 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
           };
         });
       }, 60000); // every minute
+
+      //remove on unmount
+      return () => {
+        subReceived.remove();
+        subTapped.remove();
+      };
     } catch (error: any) {
       // Optionally handle error state here
       appLog("Failed to fetch orders:", error);

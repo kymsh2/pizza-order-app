@@ -1,8 +1,10 @@
+import { appLog } from "../utils/logger";
 import { supabase } from "./client";
 
 export function subscribeToOrders(
   onChange: (order: any, event: "INSERT" | "UPDATE" | "DELETE") => void
 ) {
+  console.log("Subscribe to realtime on Orders");
   const channel = supabase
     .channel("orders-realtime")
     .on(
@@ -18,7 +20,9 @@ export function subscribeToOrders(
         onChange(payload.new, payload.eventType);
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log("Realtime status:", status);
+    });
 
   return channel;
 }

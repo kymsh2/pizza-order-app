@@ -28,6 +28,25 @@ export async function playNewOrderSound() {
   await sound.playAsync();
 }
 
+// Listen to push notifications received in foreground
+export function addNotificationReceivedListener(
+  notificationReceivedHandler: any
+) {
+  return Notifications.addNotificationReceivedListener(
+    notificationReceivedHandler
+  );
+}
+
+// Listen to push notification responses (taps)
+export function addNotificationResponseListener(
+  notificationResponseHandler: any
+) {
+  return Notifications.addNotificationResponseReceivedListener(
+    notificationResponseHandler
+  );
+}
+
+// show  Supabase Realtime new order notification
 export async function showNewOrderNotification(customerName: string) {
   //   if (Platform.OS === "web") {
   //     return; // ❌ no notifications on web
@@ -63,7 +82,7 @@ export async function registerForPushToken() {
 
   // Android channel (required)
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
+    await Notifications.setNotificationChannelAsync("orders", {
       name: "Orders",
       importance: Notifications.AndroidImportance.MAX,
       sound: "default",

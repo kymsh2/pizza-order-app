@@ -1,7 +1,7 @@
 const getStatusColor = (status: string): string => {
   switch (status) {
     case "NEW":
-      return "#71dc62";
+      return "#00FF00";
     case "ACCEPTED":
       return "#ff6d01";
     case "COMPLETED":
@@ -27,4 +27,4 @@ const getStatusBGColor = (status: string): string => {
       return "black"; // Default color
   }
 };
-export { getStatusColor };
+export { getStatusBGColor, getStatusColor };

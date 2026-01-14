@@ -189,7 +189,7 @@ export const styles = StyleSheet.create({
   },
    orderStatusNew: {
     fontSize: 10,
-    color: "#71dc62",
+    color: "#808080",
     marginTop: 2,
     fontWeight: "bold",
   },

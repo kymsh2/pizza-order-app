@@ -4,6 +4,7 @@ import { appError, appLog } from "@/src/utils/logger";
 import {
   addNotificationReceivedListener,
   addNotificationResponseListener,
+  playNewOrderSound,
 } from "@/src/utils/notifications";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -19,6 +20,7 @@ import {
 import { completeOrder, fetchOrders } from "../../src/api/orders.api";
 import { Order, OrderStatus } from "../../src/type/orders";
 import styles from "../styles/styles";
+import AppLogsModal from "./AppLogsModal";
 import OrderDetail from "./OrderDetail";
 
 interface PizzaOrderState {
@@ -51,15 +53,17 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       appLog("Fetched orders:", orders);
 
       // Listen for push notifications received while app is in foreground
-      const subReceived = addNotificationReceivedListener(() => {
-        console.log("📩 Push notification received in foreground");
-        fetchOrders();
+      const subReceived = addNotificationReceivedListener(async () => {
+        appLog("📩 Push notification received in foreground");
+        const orders = await fetchOrders();
+        this.setState({ orders: orders, now: Date.now() });
       });
 
       // Listen for push notification taps
-      const subTapped = addNotificationResponseListener(() => {
-        console.log("📲 Notification tapped");
-        fetchOrders();
+      const subTapped = addNotificationResponseListener(async () => {
+        appLog("📲 Notification tapped");
+        const orders = await fetchOrders();
+        this.setState({ orders: orders, now: Date.now() });
       });
 
       // // Set up real-time subscription for NEW orders
@@ -93,6 +97,9 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
           };
         });
       }, 60000); // every minute
+
+      // Every 5 minute, automatically check for new orders to ensure sync
+      this.interval = setInterval(() => this.checkForNewOrders(), 300000); // every 5 minutes
 
       //remove on unmount
       return () => {
@@ -177,7 +184,8 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     return (
       <View style={styles.container}>
         <View style={[styles.headerRow]}>
-          <Text style={styles.heading}>Orders</Text>
+          {/* <Text style={styles.heading}>Orders</Text> */}
+          <AppLogsModal trigger={<Text style={styles.heading}>Orders</Text>} />
 
           <TouchableOpacity
             style={styles.refreshButton}
@@ -211,10 +219,20 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
           contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item: order }) => (
             <Pressable
-              style={styles.orderListItem}
+              style={[
+                styles.orderListItem,
+                {
+                  backgroundColor:
+                    order.status == OrderStatus.NEW
+                      ? "#00FF00"
+                      : order.status == OrderStatus.ACCEPTED
+                      ? "#f9e0d3"
+                      : "white",
+                },
+              ]}
               onPress={() => this.handleOrderPress(order)}
             >
-              <View style={styles.orderRow}>
+              <View style={[styles.orderRow]}>
                 <View style={styles.orderStatusWrapper}>
                   <View style={styles.orderStatusIconCircle}>
                     <FontAwesome
@@ -235,7 +253,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
                           ? "#1c39bb"
                           : order.status === OrderStatus.CANCELLED
                           ? "#b71c1c"
-                          : "#71dc62"
+                          : "#808080"
                       }
                     />
                   </View>
@@ -289,14 +307,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     const pickupTime = new Date(pickupTimeUtcStr).getTime();
     const diffMs = pickupTime - this.state.now;
     const diffMin = Math.ceil(diffMs / 60000);
-    appLog(
-      "Remaining minutes for order",
-      order.id,
-      ":",
-      pickupTime,
-      diffMs,
-      diffMin
-    );
+    appLog("Remaining minutes for order", order.id, ":", diffMin);
 
     return diffMin > 0 ? diffMin : 0;
   }
@@ -306,6 +317,8 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     let hasChanges = false;
 
     const updatedOrders = orders.map((order) => {
+      if (order.status !== OrderStatus.ACCEPTED) return order;
+
       appLog(
         "Processing order:",
         order.id,
@@ -318,7 +331,6 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
         "-",
         order.remaining_seconds
       );
-      if (order.status !== OrderStatus.ACCEPTED) return order;
 
       const remaining = this.getRemainingMinutes(order);
       appLog("Remaining minutes for order.id ", order.id, " -> ", remaining);
@@ -341,6 +353,26 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     });
 
     return updatedOrders;
+  }
+
+  async checkForNewOrders() {
+    appLog("triggering check for new orders");
+    const latestOrders = await fetchOrders();
+    const existingOrderIds = this.state.orders.map((o) => o.id);
+
+    // Find new orders
+    const newOrders = latestOrders.filter(
+      (order) => !existingOrderIds.includes(order.id)
+    );
+
+    if (newOrders.length > 0) {
+      appLog(
+        "New orders detected:",
+        newOrders.map((o) => o.id)
+      );
+      await playNewOrderSound();
+    }
+    this.setState({ orders: latestOrders, now: Date.now() });
   }
 }
 

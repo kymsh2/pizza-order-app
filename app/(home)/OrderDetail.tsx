@@ -1,6 +1,6 @@
 import { acceptOrder } from "@/src/api/orders.api";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
-import { appLog } from "@/src/utils/logger";
+import { appError, appLog } from "@/src/utils/logger";
 import { getStatusColor } from "@/src/utils/status-helper";
 import React, { useState } from "react";
 import {
@@ -73,7 +73,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
       showsVerticalScrollIndicator={true}
     >
       {/* <View style={[styles.orderDetailContainer]}> */}
-      <View style={[styles.statusBadge, { backgroundColor: "#faf4e2" }]}>
+      <View style={[styles.statusBadge, { backgroundColor: "#C4C4C4" }]}>
         <Icon name="check" size={18} color={getStatusColor(order.status)} />
         <Text
           style={[styles.statusText, { color: getStatusColor(order.status) }]}

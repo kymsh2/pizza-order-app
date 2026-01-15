@@ -36,6 +36,14 @@ const AppLogsModal: React.FC<AppLogsModalProps> = ({ trigger }) => {
       </Pressable>
 
       <Modal visible={showLogs} animationType="slide">
+        <View style={styles.modalButtons}>
+          <Text style={styles.button} onPress={closeLogs}>
+            Close
+          </Text>
+          <Text style={styles.button} onPress={clearLogsHandler}>
+            Clear Logs
+          </Text>
+        </View>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>📝 App Logs</Text>
           <FlatList
@@ -47,14 +55,6 @@ const AppLogsModal: React.FC<AppLogsModalProps> = ({ trigger }) => {
               </Text>
             )}
           />
-          <View style={styles.modalButtons}>
-            <Text style={styles.button} onPress={closeLogs}>
-              Close
-            </Text>
-            <Text style={styles.button} onPress={clearLogsHandler}>
-              Clear Logs
-            </Text>
-          </View>
         </View>
       </Modal>
     </>

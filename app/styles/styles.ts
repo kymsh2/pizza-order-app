@@ -212,10 +212,13 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   orderAmount: {
-     fontSize: 14 ,
-     fontWeight: "bold",
-    // color: "#4caf50",
-    marginLeft: 32,
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#000",
+    minWidth: 70,          // 👈 protects layout
+    textAlign: "right",
+    flexShrink: 0,         // 👈 NEVER shrink
+    marginLeft: 16,        
   },
   orderDetailSection: {
     marginBottom: 22,

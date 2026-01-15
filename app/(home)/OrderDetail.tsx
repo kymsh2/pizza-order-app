@@ -84,7 +84,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
 
       {/* Order meta section */}
       <View style={styles.metaBox}>
-        <Row label="ID" value={order.id} />
+        <Row label="Order number" value={order.wc_order_id} />
         <Row
           label="Placed on"
           value={convertUtcToLocal(order.created_at + "Z")}

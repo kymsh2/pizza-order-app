@@ -32,7 +32,9 @@ interface PizzaOrderState {
 }
 
 class PizzaOrder extends Component<{}, PizzaOrderState> {
-  interval: ReturnType<typeof setInterval> | undefined;
+  orderCompleteCheckInterval: ReturnType<typeof setInterval> | undefined;
+  fetchInterval: ReturnType<typeof setInterval> | undefined;
+
   realtimeChannel: any;
 
   constructor(props: {}) {
@@ -50,7 +52,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     try {
       //fetch at startup
       const orders = await fetchOrders();
-      appLog("Fetched orders:", orders);
+      appLog("Fetched orders size:", orders.length);
 
       // Listen for push notifications received while app is in foreground
       const subReceived = addNotificationReceivedListener(async () => {
@@ -86,7 +88,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       this.setState({ orders: updatedOrders, now: Date.now() });
 
       // Every minute, automatically complete orders that are ready
-      this.interval = setInterval(() => {
+      this.orderCompleteCheckInterval = setInterval(() => {
         this.setState((prevState) => {
           const updatedOrders = this.processCompletedOrders(prevState.orders);
           return {
@@ -99,7 +101,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       }, 60000); // every minute
 
       // Every 5 minute, automatically check for new orders to ensure sync
-      this.interval = setInterval(() => this.checkForNewOrders(), 300000); // every 5 minutes
+      this.fetchInterval = setInterval(() => this.checkForNewOrders(), 300000); // every 5 minutes
 
       //remove on unmount
       return () => {
@@ -113,7 +115,9 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
   }
 
   componentWillUnmount() {
-    if (this.interval) clearInterval(this.interval);
+    if (this.orderCompleteCheckInterval)
+      clearInterval(this.orderCompleteCheckInterval);
+    if (this.fetchInterval) clearInterval(this.fetchInterval);
 
     if (this.realtimeChannel) {
       unsubscribeFromOrders(this.realtimeChannel);

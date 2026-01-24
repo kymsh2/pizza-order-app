@@ -1,4 +1,6 @@
+import { fetchMessageTemplates } from "@/src/api/messageTemplate.api";
 import { unsubscribeFromOrders } from "@/src/supabase/subscribe";
+import { MessageTemplate } from "@/src/type/messageTemplate";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
 import { appError, appLog } from "@/src/utils/logger";
 import {
@@ -11,6 +13,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { Component } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   FlatList,
   Pressable,
   Text,
@@ -29,6 +32,7 @@ interface PizzaOrderState {
   selectedOrder: Order | null;
   now: number;
   refreshing: boolean;
+  messageTemplate: MessageTemplate | null;
 }
 
 class PizzaOrder extends Component<{}, PizzaOrderState> {
@@ -36,6 +40,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
   fetchInterval: ReturnType<typeof setInterval> | undefined;
 
   realtimeChannel: any;
+  backHandler: any;
 
   constructor(props: {}) {
     super(props);
@@ -45,6 +50,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       selectedOrder: null,
       now: Date.now(),
       refreshing: false,
+      messageTemplate: null,
     };
   }
 
@@ -103,6 +109,16 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
       // Every 5 minute, automatically check for new orders to ensure sync
       this.fetchInterval = setInterval(() => this.checkForNewOrders(), 300000); // every 5 minutes
 
+      //hardware back button handler
+      this.backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        this.handleHardwareBack
+      );
+
+      //fetch message templates
+      const template = await fetchMessageTemplates();
+      this.setState({ messageTemplate: template });
+
       //remove on unmount
       return () => {
         subReceived.remove();
@@ -122,6 +138,8 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
     if (this.realtimeChannel) {
       unsubscribeFromOrders(this.realtimeChannel);
     }
+
+    this.backHandler?.remove();
   }
 
   handleOrderPress = (order: Order) => {
@@ -139,6 +157,17 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
   handleBack = () => {
     this.setState({ selectedOrder: null });
+  };
+
+  handleHardwareBack = () => {
+    if (this.state.selectedOrder) {
+      // We are on Order Detail → go back to Orders list
+      this.handleBack();
+      return true; // ⛔ prevent app exit
+    }
+
+    // We are already on Orders list → allow app to exit
+    return false;
   };
 
   handleManualRefresh = async () => {
@@ -180,6 +209,7 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
           <OrderDetail
             order={selectedOrder}
             onOrderUpdated={this.handleOrderUpdated}
+            messageTemplate={this.state.messageTemplate}
           />
         </View>
       );
@@ -306,12 +336,17 @@ class PizzaOrder extends Component<{}, PizzaOrderState> {
 
     const pickupTimeUtcStr =
       pickupAt[pickupAt.length - 1] === "Z" ? pickupAt : pickupAt + "Z";
-    appLog("pickupTimeUtcStr:", pickupTimeUtcStr);
-    appLog("pickupTimeLocal:", convertUtcToLocal(pickupTimeUtcStr));
+    //appLog("pickupTimeUtcStr:", pickupTimeUtcStr);
+    appLog(
+      "Order.id:",
+      order.id,
+      " pickupTimeLocal:",
+      convertUtcToLocal(pickupTimeUtcStr)
+    );
     const pickupTime = new Date(pickupTimeUtcStr).getTime();
     const diffMs = pickupTime - this.state.now;
     const diffMin = Math.ceil(diffMs / 60000);
-    appLog("Remaining minutes for order", order.id, ":", diffMin);
+    //appLog("Remaining minutes for order", order.id, ":", diffMin);
 
     return diffMin > 0 ? diffMin : 0;
   }

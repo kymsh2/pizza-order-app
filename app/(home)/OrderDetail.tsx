@@ -1,6 +1,8 @@
 import { acceptOrder } from "@/src/api/orders.api";
+import { MessageTemplate } from "@/src/type/messageTemplate";
 import { convertUtcToLocal } from "@/src/utils/dates-helper";
 import { appError, appLog } from "@/src/utils/logger";
+import { sendOrderConfirmation } from "@/src/utils/messages";
 import { getStatusColor } from "@/src/utils/status-helper";
 import React, { useState } from "react";
 import {
@@ -17,11 +19,16 @@ import styles from "../styles/styles";
 interface OrderDetailProps {
   order: Order;
   onOrderUpdated: (updatedOrder: Order) => void;
+  messageTemplate: MessageTemplate | null;
 }
 
 const PREP_TIME_OPTIONS = [5, 10, 15, 20, 30, 45, 60, 90];
 
-const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
+const OrderDetail: React.FC<OrderDetailProps> = ({
+  order,
+  onOrderUpdated,
+  messageTemplate,
+}) => {
   if (!order) return <Text>No order found.</Text>;
 
   /**
@@ -32,6 +39,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
   const [prepMinutes, setPrepMinutes] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [template, setTemplate] = useState<string | null>(null);
 
   // 🔹 ACCEPT ORDER HANDLER
   const handleAcceptOrder = async () => {
@@ -43,7 +51,15 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
 
       const res: AcceptOrderResponse = await acceptOrder(order.id, prepMinutes);
 
-      if (!res.success) {
+      if (res.success) {
+        appLog("Order accepted:", res.order.id);
+        appLog("Sending order confirmation SMS...");
+        const pickupAtLocal = convertUtcToLocal(res.order.pickup_at + "Z");
+        sendOrderConfirmation(
+          { ...order, pickup_at: pickupAtLocal },
+          messageTemplate
+        );
+      } else {
         throw new Error("failed to accept order");
       }
 
@@ -54,7 +70,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onOrderUpdated }) => {
         status: OrderStatus.ACCEPTED,
         accepted_at: res.order.accepted_at,
         pickup_at: res.order.pickup_at,
-        prep_minutes: res.order.prep_minutes,
+        prep_minutes: prepMinutes, //res.order.prep_minutes,
       });
 
       setShowPickupSelector(false);

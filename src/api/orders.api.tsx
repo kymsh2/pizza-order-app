@@ -3,14 +3,14 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 import { AcceptOrderResponse, Order } from "../type/orders";
-import { appLog } from "../utils/logger";
+import { appError, appLog } from "../utils/logger";
 
 const SUBABASE_URL_BASE = Constants.expoConfig?.extra?.env?.SUBABASE_URL_BASE;
 const SUPABASE_KEY = Constants.expoConfig?.extra?.env?.KITCHEN_APP_API_KEY;
 
 if (!SUBABASE_URL_BASE || !SUPABASE_KEY) {
   throw new Error(
-    "Environment variables for supabase url and supabase key are not set."
+    "Environment variables for supabase url and supabase key are not set.",
   );
 }
 
@@ -27,7 +27,7 @@ appLog(Device.osName, Device.osVersion);
  **********************/
 export async function acceptOrder(
   orderId: string,
-  prepMinutes: number
+  prepMinutes: number,
 ): Promise<AcceptOrderResponse> {
   appLog("Accepting order via Supabase function...");
   if (!SUPABASE_KEY) {
@@ -52,14 +52,14 @@ export async function acceptOrder(
     const response = await fetch(url, config);
     if (!response.ok) {
       throw new Error(
-        `Network response was not ok: ${response.status} ${response.statusText}`
+        `Network response was not ok: ${response.status} ${response.statusText}`,
       );
     }
     return await response.json();
   } catch (error: any) {
     appError("Error fetching orders:", error);
     throw new Error(
-      error?.message || "Unknown error occurred while fetching orders"
+      error?.message || "Unknown error occurred while fetching orders",
     );
   }
 }
@@ -85,7 +85,7 @@ export async function fetchOrders(): Promise<Order[]> {
     const response = await fetch(url, config);
     if (!response.ok) {
       throw new Error(
-        `Network response was not ok: ${response.status} ${response.statusText}`
+        `Network response was not ok: ${response.status} ${response.statusText}`,
       );
     }
     const data = await response.json();
@@ -96,7 +96,7 @@ export async function fetchOrders(): Promise<Order[]> {
   } catch (error: any) {
     appError("Error fetching orders:", error);
     throw new Error(
-      error?.message || "Unknown error occurred while fetching orders"
+      error?.message || "Unknown error occurred while fetching orders",
     );
   }
 }
@@ -120,7 +120,7 @@ export async function completeOrder(orderId: string) {
     const response = await fetch(url, config);
     if (!response.ok) {
       throw new Error(
-        `Network response was not ok: ${response.status} ${response.statusText}`
+        `Network response was not ok: ${response.status} ${response.statusText}`,
       );
     }
   } catch (err) {
@@ -162,7 +162,7 @@ export async function fetchWooCommerceOrders(): Promise<WooOrder[]> {
   appLog("Fetching orders from API...");
   if (!CONSUMER_KEY || !CONSUMER_SECRET) {
     throw new Error(
-      "WooCommerce API keys are not set in environment variables."
+      "WooCommerce API keys are not set in environment variables.",
     );
   }
   const url = `https://crusteezpizza.com.au/wp-json/wc/v3/orders?consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}`;
@@ -170,7 +170,7 @@ export async function fetchWooCommerceOrders(): Promise<WooOrder[]> {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(
-        `Network response was not ok: ${response.status} ${response.statusText}`
+        `Network response was not ok: ${response.status} ${response.statusText}`,
       );
     }
     const data = await response.json();
@@ -181,7 +181,7 @@ export async function fetchWooCommerceOrders(): Promise<WooOrder[]> {
   } catch (error: any) {
     appError("Error fetching orders:", error);
     throw new Error(
-      error?.message || "Unknown error occurred while fetching orders"
+      error?.message || "Unknown error occurred while fetching orders",
     );
   }
 }

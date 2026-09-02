@@ -4,6 +4,7 @@ export interface MessageTemplate {
     orderAccepted: {
       subject: string;
       body: string;
+      text: string;
     };
   };
   meta: {
